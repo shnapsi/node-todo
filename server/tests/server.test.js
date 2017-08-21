@@ -9,7 +9,7 @@ beforeEach((done) => {
     Todo.remove({}).then(() => done());
 });
 
-describe('POst/todos', () => {
+describe('post/todos', () => {
   it('should create a new todo', (done) => {
     var text = 'Test todo text';
 
