@@ -10,10 +10,14 @@ const {ObjectID} = require('mongodb');
 const todos = [
   {
     _id: new ObjectID(),
-    text: 'first test todo'
+    text: 'first test todo',
+    completed: false,
+    completedAt: null
   },  {
     _id: new ObjectID(),
-    text: 'second test todo'
+    text: 'second test todo',
+    completed: true,
+    completedAt: 444
 }
 ];
 beforeEach((done) => {
@@ -148,3 +152,36 @@ describe('Delete /todos :id', () => {
     });
 
   });
+
+  describe('Update /todos :id', () => {
+      it('should update a todo by id', (done) => {
+        var hexId = todos[0]._id.toHexString();
+        request(app)
+        .patch(`/todos/${hexId}`)
+        .send({
+          "text": "Updated from test",
+          "completed": true,
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.todo.text).toBe('Updated from test')
+          expect(res.body.todo.completedAt).toBeA('number')
+
+        }).end(done);
+      });
+
+      it('should clear completedAt when todo is not completed', (done) => {
+        var hexId = todos[1]._id.toHexString();
+        request(app)
+        .patch(`/todos/${hexId}`)
+        .send({
+          "completed": false
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.todo.completed).toBe(false);
+          expect(res.body.todo.completedAt).toNotExist();
+        })
+        .end(done);
+      });
+    });
