@@ -297,3 +297,37 @@ describe('Delete /todos :id', () => {
           .end(done);
       });
     });
+
+    describe('DELETE /users/me/token', ()=> {
+      it('should remove user token if valid', (done) => {
+        console.log('token:' , users[0].tokens[0].token);
+          request(app)
+            .delete('/users/me/token')
+            .set('x-auth', users[0].tokens[0].token)
+            .expect(200)
+            .expect((res) => {
+              expect(res.headers['x-auth']).toNotExist();
+            })
+            .end((err, res) => {
+              if(err) {
+                return done(err);
+              }
+              User.findById(users[0]._id).then((user) => {
+                if(!user) {
+                  console.log('Couldn\'t find user with id ', users[0]._id);
+                  done();
+                }
+                expect(user.tokens.length).toBe(0);
+                  done();
+              }).catch((e) => done(e));
+            });
+      });
+
+      it('should not remove user token if user is not valid', (done) => {
+        request(app)
+          .delete('/users/me/token')
+          .set('x-auth', users[0].tokens[0].token + 'aa')
+          .expect(401)
+          .end(done);
+      });
+    });
